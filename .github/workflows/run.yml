@@ -12,6 +12,8 @@ on:
       chat_id:
         description: 'Telegram ID'
         required: true
+      caller_name:
+        description: 'Username'
 
 jobs:
   build:
@@ -27,13 +29,13 @@ jobs:
         run: |
           unzip "${{ github.event.inputs.file_name }}"
           if [ -f framework.jar ]; then
-            patch=framework.jar
+            export patch=framework.jar
           elif [ -f services.jar ]; then
-            patch=services.jar
+            export patch=services.jar
           elif [ -f miui-framework.jar ]; then
-            patch=miui-framework.jar
+            export patch=miui-framework.jar
           elif [ -f miui-services.jar ]; then
-            patch=miui-services.jar
+            export patch=miui-services.jar
           else
             exit 1
           fi
@@ -42,14 +44,14 @@ jobs:
           java -jar redivision.jar $patch
           date=$(TZ=UTC date +"%y%m%d%H%M")
           mv -f redivision_$patch $date_$patch
-          patch=$date_$patch
-          echo "PATCH=$patch" >> $GITHUB_ENV
+          ls && export patch=$date_$patch
+          echo "PATCH=$patch" >> "$GITHUB_ENV"
 
       - name: Send output back to Telegram
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          if [ -f "$PATCH" ]; then
+          if [ ! -f "$PATCH" ]; then
             echo "❌ Output file not found"
             exit 1
           fi
@@ -57,4 +59,4 @@ jobs:
           curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F chat_id="${{ github.event.inputs.chat_id }}" \
             -F document=@"$PATCH" \
-            -F caption="✅ Dex has been redistributed"
+            -F caption="✅ Dex has been redistributed\nUser: ${{ github.event.inputs.caller_name }}"
