@@ -43,8 +43,8 @@ jobs:
           echo "Processing $patch..."
           java -jar redivision.jar $patch
           export DATE=$(TZ=UTC date +"%y%m%d%H%M")
-          mv -f redivision_$patch $DATE_$patch
-          export patch=$DATE_$patch
+          mv -f "redivision_$patch" "$DATE_$patch"
+          ls && export patch="$DATE_$patch"
           echo "PATCH=$patch" >> "$GITHUB_ENV"
 
       - name: Send output back to Telegram
@@ -59,4 +59,4 @@ jobs:
           curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F chat_id="${{ github.event.inputs.chat_id }}" \
             -F document=@"$PATCH" \
-            -F caption="✅ Done! User: ${{ github.event.inputs.caller_name }}"
+            -F caption="✅ Redistributed for ${{ github.event.inputs.caller_name }}"
