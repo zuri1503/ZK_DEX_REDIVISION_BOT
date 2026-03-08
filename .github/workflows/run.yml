@@ -23,11 +23,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download input file
-        run: curl -L "${{ github.event.inputs.file_path }}" -o "${{ github.event.inputs.file_name }}"
+        run: curl -L "${{ github.event.inputs.file_path }}" -o "${{ github.event.inputs.file_name }}" > /dev/null 2>&1
 
       - name: Process the file
         run: |
-          unzip "${{ github.event.inputs.file_name }}"
+          unzip "${{ github.event.inputs.file_name }}" > /dev/null 2>&1
           if [ -f framework.jar ]; then
             export patch=framework.jar
           elif [ -f services.jar ]; then
@@ -39,13 +39,13 @@ jobs:
           else
             exit 1
           fi
-          sudo apt-get update && sudo apt-get install openjdk-17-jdk-headless zipalign -y
+          sudo apt-get update && sudo apt-get install openjdk-17-jdk-headless zipalign -y > /dev/null 2>&1
           echo "Processing $patch..."
           java -jar redivision.jar $patch
           rm -rf $patch "${{ github.event.inputs.file_name }}"
           export DATE=$(TZ=UTC date +"%H%M")
           mv -f "redivision_$patch" "$DATE"_"$patch"
-          ls && export patch="$DATE"_"$patch"
+          export patch="$DATE"_"$patch"
           echo "PATCH=$patch" >> "$GITHUB_ENV"
 
       - name: Send output back to Telegram
@@ -60,4 +60,4 @@ jobs:
           curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F chat_id="${{ github.event.inputs.chat_id }}" \
             -F document=@"$PATCH" \
-            -F caption="✅ Redistributed dex for ${{ github.event.inputs.caller_name }}"
+            -F caption="✅ Redistributed dex for ${{ github.event.inputs.caller_name }}" > /dev/null 2>&1
