@@ -3,7 +3,7 @@ name: run
 on:
   workflow_dispatch:
     inputs:
-      file_url:
+      file_path:
         description: 'File URL from Telegram'
         required: true
       file_name:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download input file
-        run: curl -L "${{ github.event.inputs.file_url }}" -o "${{ github.event.inputs.file_name }}"
+        run: curl -L "${{ github.event.inputs.file_path }}" -o "${{ github.event.inputs.file_name }}"
 
       - name: Process the file
         run: |
