@@ -60,4 +60,4 @@ jobs:
           curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F chat_id="${{ github.event.inputs.chat_id }}" \
             -F document=@"$PATCH" \
-            -F caption="✅ Redistributed for ${{ github.event.inputs.caller_name }}"
+            -F caption="✅ Redistributed dex for ${{ github.event.inputs.caller_name }}"
