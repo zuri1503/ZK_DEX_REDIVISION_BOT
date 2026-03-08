@@ -1,4 +1,4 @@
-name: Dex Redivision Bot
+name: run
 
 on:
   workflow_dispatch:
