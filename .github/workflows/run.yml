@@ -1,0 +1,42 @@
+name: run
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_url:
+        description: 'File URL from Telegram'
+        required: true
+      file_name:
+        description: 'File name'
+        required: true
+      chat_id:
+        description: 'Telegram ID'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download input file
+        run: curl -L "${{ github.event.inputs.file_url }}" -o "${{ github.event.inputs.file_name }}"
+
+      - name: Process the file
+        run: |
+          sudo apt-get update && sudo apt-get install openjdk-17-jdk-headless
+          echo "Processing ${{ github.event.inputs.file_name }}..."
+          cp -rf "${{ github.event.inputs.file_name }}" $GITHUB_WORKSPACE
+          java -jar $GITHUB_WORKSPACE/redivision.jar $GITHUB_WORKSPACE/"${{ github.event.inputs.file_name }}"
+          cp -rf $GITHUB_WORKSPACE/"redivision_${{ github.event.inputs.file_name }}" .
+
+      - name: Send output back to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
+            -F chat_id="${{ github.event.inputs.chat_id }}" \
+            -F document=@"redivision_${{ github.event.inputs.file_name }}" \
+            -F caption="Output file of ProjectZK Dex Redivision"
+            
