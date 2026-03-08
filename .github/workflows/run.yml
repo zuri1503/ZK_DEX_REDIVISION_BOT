@@ -42,9 +42,10 @@ jobs:
           sudo apt-get update && sudo apt-get install openjdk-17-jdk-headless zipalign -y
           echo "Processing $patch..."
           java -jar redivision.jar $patch
-          export DATE=$(TZ=UTC date +"%y%m%d%H%M")
-          mv -f "redivision_$patch" "$DATE_$patch"
-          ls && export patch="$DATE_$patch"
+          rm -rf $patch "${{ github.event.inputs.file_name }}"
+          export DATE=$(TZ=UTC date +"%H%M")
+          mv -f "redivision_$patch" "$DATE"_"$patch"
+          ls && export patch="$DATE"_"$patch"
           echo "PATCH=$patch" >> "$GITHUB_ENV"
 
       - name: Send output back to Telegram
