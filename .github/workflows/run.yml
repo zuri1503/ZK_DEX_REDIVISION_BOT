@@ -25,22 +25,33 @@ jobs:
 
       - name: Process the file
         run: |
-          unzip "${{ github.event.inputs.file_name }}" -d input
+          unzip "${{ github.event.inputs.file_name }}"
+          if [ -f framework.jar ]; then
+            patch=framework.jar
+          elif [ -f services.jar ]; then
+            patch=services.jar
+          elif [ -f miui-framework.jar ]; then
+            patch=miui-framework.jar
+          elif [ -f miui-services.jar ]; then
+            patch=miui-services.jar
+          else
+            exit 1
+          fi
           sudo apt-get update && sudo apt-get install openjdk-17-jdk-headless zipalign -y
-          echo "Processing ${{ github.event.inputs.file_name }}..."
-          java -jar redivision.jar input/framework.jar
+          echo "Processing $patch..."
+          java -jar redivision.jar $patch
+          echo "PATCH=$patch" >> $GITHUB_ENV
 
       - name: Send output back to Telegram
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          OUTPUT_FILE=$(find . -maxdepth 1 -name "redivision_*" | head -n 1)
-          if [ -z "$OUTPUT_FILE" ]; then
+          if [ -f "$PATCH" ]; then
             echo "❌ Output file not found"
             exit 1
           fi
-          echo "Sending: $OUTPUT_FILE"
+          echo "Sending: $PATCH"
           curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F chat_id="${{ github.event.inputs.chat_id }}" \
-            -F document=@"$OUTPUT_FILE" \
+            -F document=@"$PATCH" \
             -F caption="✅ Dex has been redistributed"
