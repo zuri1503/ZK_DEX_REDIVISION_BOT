@@ -28,17 +28,13 @@ jobs:
           unzip "${{ github.event.inputs.file_name }}" -d input
           sudo apt-get update && sudo apt-get install openjdk-17-jdk-headless zipalign
           echo "Processing ${{ github.event.inputs.file_name }}..."
-          for i in input/*; do
-            java -jar redivision.jar $i
-          done
+          java -jar redivision.jar input/framework.jar
 
       - name: Send output back to Telegram
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          for i in redivision_*.jar; do
-            curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
+          curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F chat_id="${{ github.event.inputs.chat_id }}" \
             -F document=@"redivision_${{ github.event.inputs.file_name }}" \
             -F caption="✅ Dex has been redistributed"
-          done
