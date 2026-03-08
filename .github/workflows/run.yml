@@ -43,7 +43,7 @@ jobs:
           echo "Processing $patch..."
           java -jar redivision.jar $patch
           rm -rf $patch "${{ github.event.inputs.file_name }}"
-          export DATE=$(TZ=UTC date +"%H%M")
+          export DATE=$(TZ=UTC date +"%y%m%d%H%M")
           mv -f "redivision_$patch" "$DATE"_"$patch"
           export patch="$DATE"_"$patch"
           echo "PATCH=$patch" >> "$GITHUB_ENV"
