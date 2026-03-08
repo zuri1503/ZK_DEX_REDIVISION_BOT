@@ -27,9 +27,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install openjdk-17-jdk-headless
           echo "Processing ${{ github.event.inputs.file_name }}..."
-          cp -rf "${{ github.event.inputs.file_name }}" $GITHUB_WORKSPACE
-          java -jar $GITHUB_WORKSPACE/redivision.jar $GITHUB_WORKSPACE/"${{ github.event.inputs.file_name }}"
-          cp -rf $GITHUB_WORKSPACE/"redivision_${{ github.event.inputs.file_name }}" .
+          java -jar redivision.jar "${{ github.event.inputs.file_name }}"
 
       - name: Send output back to Telegram
         env:
